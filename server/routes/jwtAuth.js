@@ -2,8 +2,9 @@ const router = require("express").Router();
 const pool = require("../db");
 const bcrypt = require("bcrypt");
 const jwtGenerator = require("../utils/jwtGenerator");
+const validateInfo = require("../middleware/validateInfo");
 
-router.post("/register", async (req, res) => {
+router.post("/register", validateInfo, async (req, res) => {
   try {
     // destructure return value (name, email, password)
     const { username, first_name, last_name, email, password } = req.body;
@@ -25,7 +26,7 @@ router.post("/register", async (req, res) => {
       return res.status(401).send("User already exist");
     }
 
-    // bcrypt if user doesnt exist
+    // bcrypt if user does'nt exist
 
     const saltRound = 10;
     const salt = await bcrypt.genSalt(saltRound);
@@ -46,7 +47,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", validateInfo, async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = await pool.query("SELECT * FROM users WHERE username = $1", [
