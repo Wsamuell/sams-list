@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const pool = require("../db");
 const bcrypt = require("bcrypt");
+const jwtGenerator = require("../utils/jwtGenerator");
 
 router.post("/register", async (req, res) => {
   try {
@@ -35,11 +36,41 @@ router.post("/register", async (req, res) => {
       "INSERT INTO users(username, first_name, last_name, email, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
       [username, first_name, last_name, email, bcryptPassword]
     );
-    res.json(newUser.rows[0]);
     // generate jwt token
+
+    const token = jwtGenerator(newUser.rows[0].id);
+    res.json({ token });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
+  }
+});
+
+router.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await pool.query("SELECT * FROM users WHERE username = $1", [
+      username,
+    ]);
+
+    if (user.rowCount === 0) {
+      return res.status(401).json("Username or Password incorrect");
+    }
+
+    const validatePassword = await bcrypt.compare(
+      password,
+      user.rows[0].password
+    );
+    if (!validatePassword) {
+      return res.status(401).json("Username or Password incorrect");
+    }
+
+    // generate jwt token
+
+    const token = jwtGenerator(user.rows[0].id);
+    res.json({ token });
+  } catch (err) {
+    console.error(err.message);
   }
 });
 
