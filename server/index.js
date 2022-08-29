@@ -1,17 +1,18 @@
 const express = require("express");
+const app = express();
 const cors = require("cors");
 const pool = require("./db");
-const app = express();
 const port = 9000;
 
 // middleware
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 
 //  Route plans for the list //
 
-// create a user
+app.use("/auth", require("./routes/jwtAuth"));
 
+// create a user
 app
   .route("/user")
   .get(async (req, res) => {
