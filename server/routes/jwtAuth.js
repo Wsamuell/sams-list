@@ -1,7 +1,8 @@
-const router = require("express").Router();
-const pool = require("../db");
+const authorization = require("../middleware/authorization");
 const bcrypt = require("bcrypt");
 const jwtGenerator = require("../utils/jwtGenerator");
+const pool = require("../db");
+const router = require("express").Router();
 const validateInfo = require("../middleware/validateInfo");
 
 router.post("/register", validateInfo, async (req, res) => {
@@ -72,6 +73,16 @@ router.post("/login", validateInfo, async (req, res) => {
     res.json({ token });
   } catch (err) {
     console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+router.get("/verify", authorization, async (req, res) => {
+  try {
+    res.json(true);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
   }
 });
 

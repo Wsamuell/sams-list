@@ -11,6 +11,7 @@ app.use(cors());
 //  Route plans for the list //
 
 app.use("/auth", require("./routes/jwtAuth"));
+app.use("/dashboard", require("./routes/dashboard"));
 
 // create a user
 app
